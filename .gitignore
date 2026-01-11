@@ -1,0 +1,16 @@
+# Secrets
+.env
+.env.*
+*.key
+
+# OS files
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+config.js
