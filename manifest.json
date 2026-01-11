@@ -3,10 +3,13 @@
   "name": "LinkedIn AI Post Collapser",
   "version": "1.0",
   "permissions": ["activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://www.linkedin.com/*"],
-      "js": ["config.js", "content.js"],
+      "js": ["content.js"],
       "css": ["styles.css"]
     }
   ]

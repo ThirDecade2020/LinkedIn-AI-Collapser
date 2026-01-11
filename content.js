@@ -1,5 +1,4 @@
-// Load API key from config.js
-// Assumes config.js is included in the extension
+// content.js
 
 // Detect LinkedIn posts
 function getLinkedInPosts() {
@@ -14,7 +13,7 @@ function collapsePost(post) {
   const collapseDiv = document.createElement('div');
   collapseDiv.className = 'collapsed-card';
   collapseDiv.innerHTML = `
-    AI created at least 50% of this post so, you're welcome.
+    AI created at least 50% of this post, so you're welcome.
     <button class="show-anyway">Expand this AI Slop</button>
   `;
 
@@ -30,39 +29,13 @@ function collapsePost(post) {
   };
 }
 
-// Send text to OpenAI for AI detection
+// Ask background script to check AI content
 async function checkAIContent(text) {
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: "You are an assistant that estimates what percentage of a text is AI-generated. Respond only with a number between 0 and 100."
-          },
-          {
-            role: "user",
-            content: text
-          }
-        ],
-        max_tokens: 10
-      })
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage({ action: "checkAI", text }, (resp) => {
+      resolve(resp.ai_percent ?? 0);
     });
-
-    const data = await response.json();
-    const percent = parseFloat(data.choices?.[0]?.message?.content?.trim() || 0);
-    return isNaN(percent) ? 0 : percent;
-
-  } catch (error) {
-    console.error("AI detection error:", error);
-    return 0;
-  }
+  });
 }
 
 // Main processing function
@@ -81,10 +54,10 @@ async function processPosts() {
   }
 }
 
-// Run on initial page load
+// Initial load
 processPosts();
 
-// Observe feed for dynamically loaded posts
+// Collapse dynamically as user scrolls
 const observer = new MutationObserver(() => {
   processPosts();
 });
